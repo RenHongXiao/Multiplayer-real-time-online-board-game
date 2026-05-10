@@ -1,0 +1,30 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(winget install MongoDB.Server --location \"D:\\\\MongoDB\" --silent --accept-package-agreements)",
+      "PowerShell($env:Path = [System.Environment]::GetEnvironmentVariable\\(\"Path\",\"Machine\"\\) + \";\" + [System.Environment]::GetEnvironmentVariable\\(\"Path\",\"User\"\\); where.exe mongod 2>$null; if \\($?\\) { Write-Host \"Found mongod in PATH\" }; Get-ChildItem \"D:\\\\MongoDB\" -Recurse -Filter \"mongod.exe\" -ErrorAction SilentlyContinue | Select-Object FullName; Get-ChildItem \"C:\\\\Program Files\\\\MongoDB\" -Recurse -Filter \"mongod.exe\" -ErrorAction SilentlyContinue | Select-Object FullName)",
+      "Read(//c/Program Files/MongoDB/**)",
+      "PowerShell($env:Path = \"C:\\\\Program Files\\\\MongoDB\\\\Server\\\\8.3\\\\bin;\" + $env:Path; Start-Process -FilePath \"C:\\\\Program Files\\\\MongoDB\\\\Server\\\\8.3\\\\bin\\\\mongod.exe\" -ArgumentList \"--dbpath\",\"D:\\\\mongodb-data\" -WindowStyle Hidden; Write-Host \"MongoDB starting...\"; Start-Sleep -Seconds 3; & \"C:\\\\Program Files\\\\MongoDB\\\\Server\\\\8.3\\\\bin\\\\mongosh.exe\" --eval \"db.version\\(\\)\" --quiet 2>$null; if \\($LASTEXITCODE -eq 0\\) { Write-Host \"MongoDB is running!\" } else { Write-Host \"MongoDB might still be starting, checking port...\"; netstat -an | Select-String \"27017\" })",
+      "PowerShell($env:Path = \"D:\\\\nodejs;\" + $env:Path; Set-Location \"d:\\\\Comprehensive Computer Design1\\\\board-game-platform\\\\server\"; npx tsx src/index.ts)",
+      "PowerShell(cmd /c \"set PATH=D:\\\\nodejs;%PATH% && cd /d d:\\\\Comprehensive Computer Design1\\\\board-game-platform\\\\server && npx tsx src/index.ts\")",
+      "PowerShell(Invoke-RestMethod -Uri \"http://localhost:3000/api/health\" -UseBasicParsing)",
+      "PowerShell(cmd /c \"set PATH=D:\\\\nodejs;%PATH% && cd /d d:\\\\Comprehensive Computer Design1\\\\board-game-platform\\\\server && npx tsx test-engine.ts 2>&1\")",
+      "PowerShell(cmd /c \"set PATH=D:\\\\nodejs;%PATH% && cd /d d:\\\\Comprehensive Computer Design1\\\\board-game-platform\\\\server && npx tsx test-debug.ts 2>&1\")",
+      "PowerShell(cmd /c \"set PATH=D:\\\\nodejs;%PATH% && cd /d d:\\\\Comprehensive Computer Design1\\\\board-game-platform\\\\server && npx tsx test-debug.ts 2>&1 && echo. && echo ===== Full engine test ===== && npx tsx test-engine.ts 2>&1\")",
+      "PowerShell(cmd /c \"set PATH=D:\\\\nodejs;%PATH% && cd /d d:\\\\Comprehensive Computer Design1\\\\board-game-platform\\\\server && npx tsc --noEmit 2>&1 && echo. && echo ==== TypeScript OK ==== && echo. && npx tsx test-engine.ts 2>&1\")",
+      "PowerShell(Get-Process -Name \"node\" -ErrorAction SilentlyContinue)",
+      "PowerShell(Stop-Process -Force)",
+      "PowerShell(cmd /c \"set PATH=D:\\\\nodejs;%PATH% && cd /d d:\\\\Comprehensive Computer Design1\\\\board-game-platform\\\\server && npx tsc --noEmit 2>&1\")",
+      "PowerShell(cmd /c \"set PATH=D:\\\\nodejs;%PATH% && cd /d d:\\\\Comprehensive Computer Design1\\\\board-game-platform\\\\client && npx tsc --noEmit 2>&1\")",
+      "PowerShell(cmd /c \"set PATH=D:\\\\nodejs;%PATH% && cd /d d:\\\\Comprehensive Computer Design1\\\\board-game-platform\\\\client && npx tsc --noEmit 2>&1 && npx vite build 2>&1\")",
+      "PowerShell(cmd /c \"set PATH=D:\\\\nodejs;%PATH% && cd /d d:\\\\Comprehensive Computer Design1\\\\board-game-platform\\\\server && npx tsc --noEmit 2>&1 && echo Server TS OK\")",
+      "PowerShell(cmd /c \"set PATH=D:\\\\nodejs;%PATH% && cd /d d:\\\\Comprehensive Computer Design1\\\\board-game-platform\\\\server && npx tsx test-socket.ts 2>&1\")",
+      "PowerShell(cmd /c \"set PATH=D:\\\\nodejs;%PATH% && cd /d d:\\\\Comprehensive Computer Design1\\\\board-game-platform\\\\server && npm install socket.io-client 2>&1\")",
+      "PowerShell(Get-Process -Name \"node\" -ErrorAction SilentlyContinue | ForEach-Object { Stop-Process -Id $_.Id -Force; Write-Host \"Killed node PID $\\($_.Id\\)\" }; Start-Sleep -Seconds 2; Write-Host \"Checking remaining node processes...\"; Get-Process -Name \"node\" -ErrorAction SilentlyContinue | Select-Object Id, ProcessName; Write-Host \"Done\")",
+      "PowerShell(cmd /c \"set PATH=D:\\\\nodejs;%PATH% && cd /d d:\\\\Comprehensive Computer Design1\\\\board-game-platform\\\\server && npx tsc --noEmit 2>&1 && echo Server OK\")",
+      "PowerShell(cmd /c \"set PATH=D:\\\\nodejs;%PATH% && cd /d d:\\\\Comprehensive Computer Design1\\\\board-game-platform\\\\server && npx tsx test-game-flow.ts 2>&1\")",
+      "PowerShell(cmd /c \"set PATH=D:\\\\nodejs;%PATH% && cd /d d:\\\\Comprehensive Computer Design1\\\\board-game-platform\\\\client && npx vite build 2>&1\")",
+      "PowerShell(cmd /c \"set PATH=D:\\\\nodejs;%PATH% && cd /d d:\\\\Comprehensive Computer Design1\\\\board-game-platform\\\\server && npx tsc --noEmit 2>&1 && echo OK\")"
+    ]
+  }
+}

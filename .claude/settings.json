@@ -1,0 +1,25 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(Get-ChildItem -Path \"d:\\\\Comprehensive Computer Design1\" -Recurse -Depth 2 -Force | Select-Object FullName, Mode | ForEach-Object { \"$\\($_.Mode\\) $\\($_.FullName\\)\" })",
+      "PowerShell(node --version 2>$null)",
+      "PowerShell(npm --version 2>$null)",
+      "PowerShell(mongod --version 2>$null)",
+      "PowerShell(docker --version 2>$null)",
+      "PowerShell(node --version)",
+      "PowerShell(npm --version)",
+      "PowerShell(winget install OpenJS.NodeJS.LTS --location \"D:\\\\nodejs\" --silent --accept-package-agreements)",
+      "PowerShell($env:Path = [System.Environment]::GetEnvironmentVariable\\(\"Path\",\"Machine\"\\) + \";\" + [System.Environment]::GetEnvironmentVariable\\(\"Path\",\"User\"\\); & \"D:\\\\nodejs\\\\node.exe\" --version 2>$null; if \\($LASTEXITCODE -ne 0\\) { Get-ChildItem \"D:\\\\nodejs\" -ErrorAction SilentlyContinue; where.exe node /T 2>$null; Get-ChildItem \"C:\\\\Program Files\\\\nodejs\" -ErrorAction SilentlyContinue | Select-Object FullName })",
+      "PowerShell($base = \"d:\\\\Comprehensive Computer Design1\\\\board-game-platform\"; New-Item -ItemType Directory -Force -Path \"$base\\\\server\\\\src\\\\config\", \"$base\\\\server\\\\src\\\\models\", \"$base\\\\server\\\\src\\\\routes\", \"$base\\\\server\\\\src\\\\middleware\", \"$base\\\\server\\\\src\\\\services\", \"$base\\\\server\\\\src\\\\game-engine\", \"$base\\\\server\\\\src\\\\socket\", \"$base\\\\client\\\\src\\\\components\\\\common\", \"$base\\\\client\\\\src\\\\components\\\\auth\", \"$base\\\\client\\\\src\\\\components\\\\lobby\", \"$base\\\\client\\\\src\\\\components\\\\game\", \"$base\\\\client\\\\src\\\\components\\\\profile\", \"$base\\\\client\\\\src\\\\pages\", \"$base\\\\client\\\\src\\\\stores\", \"$base\\\\client\\\\src\\\\hooks\", \"$base\\\\client\\\\src\\\\services\", \"$base\\\\client\\\\src\\\\utils\", \"$base\\\\docs\" | ForEach-Object { Write-Host \"Created: $_\" })",
+      "PowerShell($env:Path = \"D:\\\\nodejs;\" + $env:Path; Set-Location \"d:\\\\Comprehensive Computer Design1\\\\board-game-platform\\\\server\"; npm install)",
+      "PowerShell($env:Path = \"D:\\\\nodejs;\" + $env:Path; Set-Location \"d:\\\\Comprehensive Computer Design1\\\\board-game-platform\"; npx create-vite@latest client --template react-ts 2>&1)",
+      "PowerShell(cmd /c \"set PATH=D:\\\\nodejs;%PATH% && cd /d d:\\\\Comprehensive Computer Design1\\\\board-game-platform\\\\server && npm install\")",
+      "PowerShell(cmd /c \"set PATH=D:\\\\nodejs;%PATH% && cd /d d:\\\\Comprehensive Computer Design1\\\\board-game-platform && npx create-vite@latest client --template react-ts\")",
+      "PowerShell(cmd /c \"set PATH=D:\\\\nodejs;%PATH% && cd /d d:\\\\Comprehensive Computer Design1\\\\board-game-platform && echo y | npx create-vite@latest client --template react-ts\")",
+      "PowerShell(cmd /c \"set PATH=D:\\\\nodejs;%PATH% && cd /d d:\\\\Comprehensive Computer Design1\\\\board-game-platform\\\\client && npm install && npm install react-router-dom zustand socket.io-client axios tailwindcss @tailwindcss/vite\")",
+      "PowerShell(cmd /c \"set PATH=D:\\\\nodejs;%PATH% && cd /d d:\\\\Comprehensive Computer Design1\\\\board-game-platform\\\\server && npm install dotenv\")",
+      "PowerShell(cmd /c \"set PATH=D:\\\\nodejs;%PATH% && cd /d d:\\\\Comprehensive Computer Design1\\\\board-game-platform\\\\server && npx tsc --noEmit\")",
+      "PowerShell(cmd /c \"set PATH=D:\\\\nodejs;%PATH% && cd /d d:\\\\Comprehensive Computer Design1\\\\board-game-platform\\\\client && npx tsc --noEmit\")"
+    ]
+  }
+}
