@@ -2,6 +2,7 @@ import mongoose, { Document, Schema, Types } from 'mongoose';
 
 export interface IRoom extends Document {
   roomId: string;
+  mode: 'pvp' | 'ai';
   gameType: 'chinese-chess' | 'gomoku';
   hostId: Types.ObjectId;
   player2Id: Types.ObjectId | null;
@@ -13,6 +14,7 @@ export interface IRoom extends Document {
 const roomSchema = new Schema<IRoom>(
   {
     roomId: { type: String, required: true, unique: true },
+    mode: { type: String, enum: ['pvp', 'ai'], default: 'pvp' },
     gameType: { type: String, required: true, enum: ['chinese-chess', 'gomoku'] },
     hostId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
     player2Id: { type: Schema.Types.ObjectId, ref: 'User', default: null },

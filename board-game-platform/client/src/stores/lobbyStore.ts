@@ -22,7 +22,7 @@ interface LobbyState {
   error: string | null;
   creating: boolean;
   fetchRooms: (gameType?: string) => Promise<void>;
-  createRoom: (gameType: 'chinese-chess' | 'gomoku') => Promise<string | null>;
+  createRoom: (gameType: 'chinese-chess' | 'gomoku', mode?: 'pvp' | 'ai') => Promise<string | null>;
   joinRoom: (roomId: string) => Promise<void>;
 }
 
@@ -47,10 +47,10 @@ export const useLobbyStore = create<LobbyState>((set) => ({
     }
   },
 
-  createRoom: async (gameType) => {
+  createRoom: async (gameType, mode = 'pvp') => {
     set({ creating: true, error: null });
     try {
-      const { data } = await api.post('/rooms', { gameType });
+      const { data } = await api.post('/rooms', { gameType, mode });
       if (data.code === 0) {
         set({ creating: false });
         return data.data.roomId;

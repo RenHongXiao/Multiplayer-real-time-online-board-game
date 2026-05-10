@@ -10,7 +10,7 @@ function formatTime(seconds: number): string {
 
 export function GameInfo() {
   const navigate = useNavigate();
-  const { gameState, myColor, timer, isMyTurn, gameType, reset, rematchRequested, setRematchRequested } = useGameStore();
+  const { gameState, myColor, timer, isMyTurn, gameType, isAI, reset, rematchRequested, setRematchRequested } = useGameStore();
 
   const handleResign = () => {
     const socket = getSocket();
@@ -80,9 +80,9 @@ export function GameInfo() {
           </span>
         </div>
         <div className={`flex justify-between items-center p-2 rounded-lg ${opponentColor === gameState.currentTurn ? 'bg-slate-700 ring-1 ring-blue-500' : 'bg-slate-750'}`}>
-          <span className="text-sm">对手</span>
+          <span className="text-sm">{isAI ? 'AI对手' : '对手'}</span>
           <span className={`text-sm font-mono ${opponentTime < 60 ? 'text-red-400' : 'text-slate-300'}`}>
-            {formatTime(opponentTime)}
+            {isAI ? '--:--' : formatTime(opponentTime)}
           </span>
         </div>
       </div>
@@ -126,9 +126,11 @@ export function GameInfo() {
           <button onClick={handleResign} className="w-full py-1.5 bg-red-600/30 hover:bg-red-600/50 text-red-400 text-sm rounded-lg transition-colors border border-red-800">
             认输
           </button>
-          <button onClick={handleDraw} className="w-full py-1.5 bg-yellow-600/30 hover:bg-yellow-600/50 text-yellow-400 text-sm rounded-lg transition-colors border border-yellow-800">
-            求和
-          </button>
+          {!isAI && (
+            <button onClick={handleDraw} className="w-full py-1.5 bg-yellow-600/30 hover:bg-yellow-600/50 text-yellow-400 text-sm rounded-lg transition-colors border border-yellow-800">
+              求和
+            </button>
+          )}
         </div>
       )}
 

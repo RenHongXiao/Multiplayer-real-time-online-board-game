@@ -7,6 +7,7 @@ const router = Router();
 
 const createRoomSchema = z.object({
   gameType: z.enum(['chinese-chess', 'gomoku']),
+  mode: z.enum(['pvp', 'ai']).optional().default('pvp'),
 });
 
 router.get('/', authMiddleware, async (req: Request, res: Response) => {
@@ -23,7 +24,7 @@ router.get('/', authMiddleware, async (req: Request, res: Response) => {
 router.post('/', authMiddleware, async (req: AuthRequest, res: Response) => {
   try {
     const data = createRoomSchema.parse(req.body);
-    const room = await RoomService.createRoom(req.userId!, data.gameType);
+    const room = await RoomService.createRoom(req.userId!, data.gameType, data.mode);
     res.json({ code: 0, data: room });
   } catch (error: unknown) {
     if (error instanceof z.ZodError) {

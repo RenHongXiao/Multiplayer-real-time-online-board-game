@@ -9,6 +9,8 @@ function setupListeners(s: Socket) {
     const store = useGameStore.getState();
     store.setGameState(data.gameState);
     store.setGameType(data.gameType);
+    store.setIsAI(data.isAI || false);
+    store.setAIColor(data.aiColor || null);
     const userStr = localStorage.getItem('user');
     console.log('[socket] user from localStorage:', userStr);
     console.log('[socket] players from server:', data.players);

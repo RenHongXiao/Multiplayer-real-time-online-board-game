@@ -7,17 +7,22 @@ export class GameService {
     roomId: string;
     gameType: 'chinese-chess' | 'gomoku';
     player1Id: string;
-    player2Id: string;
+    player2Id?: string;
     player1Color: string;
     player2Color: string;
   }) {
+    const players: { userId: Types.ObjectId; color: string }[] = [
+      { userId: new Types.ObjectId(params.player1Id), color: params.player1Color },
+    ];
+    // Only add player2 if it's a real user ID (not AI placeholder)
+    if (params.player2Id && params.player2Id !== 'ai_player') {
+      players.push({ userId: new Types.ObjectId(params.player2Id), color: params.player2Color });
+    }
+
     return GameRecord.create({
       roomId: params.roomId,
       gameType: params.gameType,
-      players: [
-        { userId: new Types.ObjectId(params.player1Id), color: params.player1Color },
-        { userId: new Types.ObjectId(params.player2Id), color: params.player2Color },
-      ],
+      players,
       moves: [],
       result: { winner: null, reason: 'draw' },
       startedAt: new Date(),

@@ -43,7 +43,11 @@ interface GameStore {
   chatMessages: { userId: string; message: string; timestamp: string }[];
   opponentDisconnected: boolean;
   rematchRequested: boolean;
+  isAI: boolean;
+  aiColor: string | null;
   setRematchRequested: (v: boolean) => void;
+  setIsAI: (v: boolean) => void;
+  setAIColor: (color: string | null) => void;
 
   setRoom: (roomId: string | null) => void;
   setGameType: (gameType: string | null) => void;
@@ -69,9 +73,13 @@ export const useGameStore = create<GameStore>((set) => ({
   chatMessages: [],
   opponentDisconnected: false,
   rematchRequested: false,
+  isAI: false,
+  aiColor: null,
 
   setRoom: (roomId) => set({ roomId }),
   setRematchRequested: (v) => set({ rematchRequested: v }),
+  setIsAI: (v) => set({ isAI: v }),
+  setAIColor: (color) => set({ aiColor: color }),
   setGameType: (gameType) => set({ gameType }),
   setMyColor: (color) => set({ myColor: color, isMyTurn: color === 'red' || color === 'black' }),
   setGameState: (state) => {
@@ -102,5 +110,7 @@ export const useGameStore = create<GameStore>((set) => ({
       timer: { red: 1200, black: 1200 },
       chatMessages: [],
       opponentDisconnected: false,
+      isAI: false,
+      aiColor: null,
     }),
 }));

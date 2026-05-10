@@ -82,6 +82,30 @@ export class Gomoku extends BaseGame {
     return moves;
   }
 
+  clone(): Gomoku {
+    const g = new Gomoku();
+    g.board = this.board.map(row => [...row]);
+    g.currentTurn = this.currentTurn;
+    g.moves = this.moves.map(m => ({
+      from: { ...m.from },
+      to: { ...m.to },
+      piece: { ...m.piece },
+      captured: m.captured ? { ...m.captured } : undefined,
+    }));
+    g.moveCount = this.moveCount;
+    g.isOver = this.isOver;
+    g.result = this.result ? { ...this.result } : null;
+    return g;
+  }
+
+  getSize(): number {
+    return this.SIZE;
+  }
+
+  getBoard(): Stone[][] {
+    return this.board as Stone[][];
+  }
+
   private checkFiveInRow(x: number, y: number, color: 'black' | 'white'): boolean {
     const directions = [
       [0, 1], [1, 0], [1, 1], [1, -1],

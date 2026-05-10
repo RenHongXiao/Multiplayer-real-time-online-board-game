@@ -8,7 +8,7 @@ import { GameChat } from '../components/game/GameChat';
 
 export function GamePage() {
   const { roomId } = useParams<{ roomId: string }>();
-  const { gameState, myColor, gameType, opponentDisconnected, setRoom } = useGameStore();
+  const { gameState, myColor, gameType, opponentDisconnected, isAI, setRoom } = useGameStore();
 
   useEffect(() => {
     if (roomId && !useGameStore.getState().roomId) {
@@ -27,6 +27,15 @@ export function GamePage() {
         <p className="text-slate-500 text-sm">
           我是：<span className={myColor === 'red' || myColor === 'black' ? 'text-red-400' : 'text-white'}>{myColor === 'red' ? '红方' : myColor === 'black' ? '黑方' : '等待分配'}</span>
         </p>
+      </div>
+    );
+  }
+
+  if (isAI && !myColor) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
+        <div className="text-4xl animate-bounce">🤖</div>
+        <p className="text-slate-400 text-lg">正在初始化AI对战...</p>
       </div>
     );
   }

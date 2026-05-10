@@ -12,6 +12,7 @@ export function LobbyPage() {
   const navigate = useNavigate();
   const { rooms, loading, error, creating, fetchRooms, createRoom, joinRoom } = useLobbyStore();
   const [gameType, setGameType] = useState<'chinese-chess' | 'gomoku'>('chinese-chess');
+  const [mode, setMode] = useState<'pvp' | 'ai'>('pvp');
   const [joinRoomId, setJoinRoomId] = useState('');
   const [filterType, setFilterType] = useState<string>('');
 
@@ -22,7 +23,7 @@ export function LobbyPage() {
   }, [filterType]);
 
   const handleCreateRoom = async () => {
-    const roomId = await createRoom(gameType);
+    const roomId = await createRoom(gameType, mode);
     if (roomId) {
       useGameStore.getState().setRoom(roomId);
       useGameStore.getState().setGameType(gameType);
@@ -63,6 +64,31 @@ export function LobbyPage() {
                 <option value="chinese-chess">中国象棋</option>
                 <option value="gomoku">五子棋</option>
               </select>
+            </div>
+            <div>
+              <label className="block text-slate-300 text-sm mb-1">对战模式</label>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setMode('pvp')}
+                  className={`flex-1 py-2 rounded-lg text-sm font-medium transition-colors ${
+                    mode === 'pvp'
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-slate-700 text-slate-400 hover:bg-slate-600'
+                  }`}
+                >
+                  人人对战
+                </button>
+                <button
+                  onClick={() => setMode('ai')}
+                  className={`flex-1 py-2 rounded-lg text-sm font-medium transition-colors ${
+                    mode === 'ai'
+                      ? 'bg-purple-600 text-white'
+                      : 'bg-slate-700 text-slate-400 hover:bg-slate-600'
+                  }`}
+                >
+                  AI对战
+                </button>
+              </div>
             </div>
             <button
               onClick={handleCreateRoom}

@@ -5,13 +5,17 @@ import { GameService } from '../services/gameService';
 import { ChineseChess } from '../game-engine/ChineseChess';
 import { Gomoku } from '../game-engine/Gomoku';
 
-interface GameSession {
+export interface GameSession {
   roomId: string;
   gameType: 'chinese-chess' | 'gomoku';
+  mode: 'pvp' | 'ai';
   players: Map<string, string>; // socketId -> color
   gameInstance: ChineseChess | Gomoku;
   recordId: string | null;
   timer: any;
+  isAI: boolean;
+  aiColor: string | null;
+  humanColor: string | null;
 }
 
 const sessions = new Map<string, GameSession>();
@@ -42,7 +46,10 @@ async function tryStartGame(io: Server, roomId: string, socket: AuthSocket): Pro
 
   const hostId = room.hostId._id?.toString();
   const player2Id = room.player2Id?._id?.toString();
-  if (!player2Id) return;
+  const isAI = (room as any).mode === 'ai';
+
+  // For PvP, require player2
+  if (!isAI && !player2Id) return;
 
   const { p1, p2 } = getColors(room.gameType);
 
@@ -52,54 +59,88 @@ async function tryStartGame(io: Server, roomId: string, socket: AuthSocket): Pro
     const gameInstance = room.gameType === 'chinese-chess' ? new ChineseChess() : new Gomoku();
     gameInstance.initialize();
 
+    // For AI mode, use a placeholder ID for the AI player
+    const effectivePlayer2Id = isAI ? 'ai_player' : player2Id!;
+
     const record = await GameService.createRecord({
       roomId,
       gameType: room.gameType,
       player1Id: hostId!,
-      player2Id,
+      player2Id: effectivePlayer2Id,
       player1Color: p1,
       player2Color: p2,
     });
 
     const timer: any = { lastTick: Date.now(), interval: null };
     timer[p1] = DEFAULT_TIME;
-    timer[p2] = DEFAULT_TIME;
+    if (!isAI) {
+      timer[p2] = DEFAULT_TIME;
+    }
 
     session = {
       roomId,
       gameType: room.gameType,
+      mode: isAI ? 'ai' : 'pvp',
       players: new Map(),
       gameInstance,
       recordId: record._id.toString(),
       timer,
+      isAI,
+      aiColor: isAI ? p2 : null,
+      humanColor: isAI ? p1 : null,
     };
 
-    // Start the timer
+    // Start the timer (only human timer matters in AI mode)
     session.timer.interval = setInterval(() => {
       const now = Date.now();
       const elapsed = (now - session!.timer.lastTick) / 1000;
       session!.timer.lastTick = now;
 
       const currentTurn = session!.gameInstance.getState().currentTurn;
-      session!.timer[currentTurn] = Math.max(0, (session!.timer[currentTurn] || DEFAULT_TIME) - elapsed);
+      if (session!.isAI) {
+        // In AI mode, only track human time
+        const humanColor = session!.humanColor!;
+        if (currentTurn === humanColor) {
+          session!.timer[humanColor] = Math.max(0, (session!.timer[humanColor] || DEFAULT_TIME) - elapsed);
+        }
+        const tu: any = {};
+        tu[p1] = Math.floor(session!.timer[p1]);
+        tu[p2] = 999999; // AI has infinite time from client perspective
+        io.to(roomId).emit('timer_update', tu);
 
-      const tu: any = {};
-      tu[p1] = Math.floor(session!.timer[p1]);
-      tu[p2] = Math.floor(session!.timer[p2]);
-      io.to(roomId).emit('timer_update', tu);
+        if (session!.timer[humanColor] <= 0) {
+          clearInterval(session!.timer.interval);
+          session!.timer.interval = null;
+          session!.gameInstance['isOver'] = true;
+          session!.gameInstance['result'] = { winner: session!.aiColor, reason: 'timeout' } as any;
+          io.to(roomId).emit('game_over', {
+            result: { winner: session!.aiColor, reason: 'timeout' },
+            gameState: session!.gameInstance.getState(),
+          });
+          RoomService.finishRoom(roomId);
+          removeSession(roomId);
+        }
+      } else {
+        session!.timer[currentTurn] = Math.max(0, (session!.timer[currentTurn] || DEFAULT_TIME) - elapsed);
 
-      if (session!.timer[p1] <= 0 || session!.timer[p2] <= 0) {
-        clearInterval(session!.timer.interval);
-        session!.timer.interval = null;
-        const winner: any = session!.timer[p1] <= 0 ? p2 : p1;
-        session!.gameInstance['isOver'] = true;
-        session!.gameInstance['result'] = { winner, reason: 'timeout' } as any;
-        io.to(roomId).emit('game_over', {
-          result: { winner, reason: 'timeout' },
-          gameState: session!.gameInstance.getState(),
-        });
-        RoomService.finishRoom(roomId);
-        removeSession(roomId);
+        const tu: any = {};
+        tu[p1] = Math.floor(session!.timer[p1]);
+        tu[p2] = Math.floor(session!.timer[p2]);
+        io.to(roomId).emit('timer_update', tu);
+
+        if (session!.timer[p1] <= 0 || session!.timer[p2] <= 0) {
+          clearInterval(session!.timer.interval);
+          session!.timer.interval = null;
+          const winner: any = session!.timer[p1] <= 0 ? p2 : p1;
+          session!.gameInstance['isOver'] = true;
+          session!.gameInstance['result'] = { winner, reason: 'timeout' } as any;
+          io.to(roomId).emit('game_over', {
+            result: { winner, reason: 'timeout' },
+            gameState: session!.gameInstance.getState(),
+          });
+          RoomService.finishRoom(roomId);
+          removeSession(roomId);
+        }
       }
     }, 1000);
 
@@ -108,7 +149,7 @@ async function tryStartGame(io: Server, roomId: string, socket: AuthSocket): Pro
 
   // Add current player
   const userId = socket.userId!;
-  const color = userId === hostId ? p1 : p2;
+  const color = session.isAI ? session.humanColor! : (userId === hostId ? p1 : p2);
   session.players.set(socket.id, color);
 
   // Add any other sockets already in the room
@@ -117,15 +158,21 @@ async function tryStartGame(io: Server, roomId: string, socket: AuthSocket): Pro
     if (!session.players.has(s.id)) {
       const realSocket = io.sockets.sockets.get(s.id) as any;
       if (realSocket?.userId) {
-        const sockColor = realSocket.userId === hostId ? p1 : p2;
-        session.players.set(s.id, sockColor);
+        if (session.isAI) {
+          session.players.set(s.id, session.humanColor!);
+        } else {
+          const sockColor = realSocket.userId === hostId ? p1 : p2;
+          session.players.set(s.id, sockColor);
+        }
       }
     }
   }
 
-  console.log(`Player ${userId} added to session ${roomId} as ${color}, total: ${session.players.size}`);
+  console.log(`Player ${userId} added to session ${roomId} as ${color}, total: ${session.players.size}, AI: ${session.isAI}`);
 
-  if (session.players.size >= 2) {
+  // For AI mode, start immediately (1 player); for PvP, wait for 2
+  const requiredPlayers = session.isAI ? 1 : 2;
+  if (session.players.size >= requiredPlayers) {
     const gameState = session.gameInstance.getState();
     const playerColors: Record<string, string> = {};
     for (const [sid, pColor] of session.players) {
@@ -135,7 +182,13 @@ async function tryStartGame(io: Server, roomId: string, socket: AuthSocket): Pro
       }
     }
 
-    const startData = { gameState, players: playerColors, gameType: room.gameType };
+    const startData = {
+      gameState,
+      players: playerColors,
+      gameType: room.gameType,
+      isAI: session.isAI,
+      aiColor: session.aiColor,
+    };
     console.log(`[SERVER] game_start to ${roomId}:`, JSON.stringify(startData));
     io.to(roomId).emit('game_start', startData);
   }
@@ -144,43 +197,19 @@ async function tryStartGame(io: Server, roomId: string, socket: AuthSocket): Pro
 export function setupRoomHandlers(io: Server, socket: AuthSocket): void {
   // Rematch: restart the game in the same room
   socket.on('rematch_request', ({ roomId }: { roomId: string }) => {
+    const session = getSession(roomId);
+    if (session?.isAI) {
+      // AI mode: auto-accept rematch immediately
+      handleRematch(io, roomId);
+      return;
+    }
     socket.to(roomId).emit('rematch_request', {
       fromUser: socket.userId,
     });
   });
 
   socket.on('rematch_accept', async ({ roomId }: { roomId: string }) => {
-    const session = getSession(roomId);
-    if (!session) {
-      socket.emit('error', { message: '游戏会话不存在' });
-      return;
-    }
-
-    // Stop old timer
-    if (session.timer?.interval) clearInterval(session.timer.interval);
-
-    // Reset the game
-    session.gameInstance.initialize();
-    if (session.timer) {
-      session.timer.lastTick = Date.now();
-      const { p1, p2 } = getColors(session.gameType);
-      session.timer[p1] = DEFAULT_TIME;
-      session.timer[p2] = DEFAULT_TIME;
-    }
-
-    // Broadcast new game_start
-    const gameState = session.gameInstance.getState();
-    const playerColors: Record<string, string> = {};
-    for (const [sid, pColor] of session.players) {
-      const realSocket = io.sockets.sockets.get(sid) as any;
-      if (realSocket?.userId) playerColors[realSocket.userId] = pColor;
-    }
-
-    io.to(roomId).emit('game_start', {
-      gameState,
-      players: playerColors,
-      gameType: session.gameType,
-    });
+    await handleRematch(io, roomId);
   });
 
   socket.on('join_room', async ({ roomId }: { roomId: string }) => {
@@ -213,6 +242,10 @@ export function setupRoomHandlers(io: Server, socket: AuthSocket): void {
         if (session.players.size === 0) {
           if (session.timer?.interval) clearInterval(session.timer.interval);
           removeSession(roomId);
+          // For AI rooms, finish when human leaves
+          if (session.isAI) {
+            await RoomService.finishRoom(roomId);
+          }
         }
       }
     } catch (error) {
@@ -228,6 +261,41 @@ export function setupRoomHandlers(io: Server, socket: AuthSocket): void {
       message: message.trim(),
       timestamp: new Date().toISOString(),
     });
+  });
+}
+
+async function handleRematch(io: Server, roomId: string): Promise<void> {
+  const session = getSession(roomId);
+  if (!session) return;
+
+  // Stop old timer
+  if (session.timer?.interval) clearInterval(session.timer.interval);
+
+  // Reset the game
+  session.gameInstance.initialize();
+  if (session.timer) {
+    session.timer.lastTick = Date.now();
+    const { p1, p2 } = getColors(session.gameType);
+    session.timer[p1] = DEFAULT_TIME;
+    if (!session.isAI) {
+      session.timer[p2] = DEFAULT_TIME;
+    }
+  }
+
+  // Broadcast new game_start
+  const gameState = session.gameInstance.getState();
+  const playerColors: Record<string, string> = {};
+  for (const [sid, pColor] of session.players) {
+    const realSocket = io.sockets.sockets.get(sid) as any;
+    if (realSocket?.userId) playerColors[realSocket.userId] = pColor;
+  }
+
+  io.to(roomId).emit('game_start', {
+    gameState,
+    players: playerColors,
+    gameType: session.gameType,
+    isAI: session.isAI,
+    aiColor: session.aiColor,
   });
 }
 

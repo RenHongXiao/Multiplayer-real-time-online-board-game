@@ -11,12 +11,14 @@ function generateRoomId(): string {
 }
 
 export class RoomService {
-  static async createRoom(userId: string, gameType: 'chinese-chess' | 'gomoku') {
+  static async createRoom(userId: string, gameType: 'chinese-chess' | 'gomoku', mode: 'pvp' | 'ai' = 'pvp') {
     const roomId = generateRoomId();
     const room = await Room.create({
       roomId,
       gameType,
+      mode,
       hostId: new Types.ObjectId(userId),
+      ...(mode === 'ai' ? { status: 'playing' } : {}),
     });
     return room;
   }

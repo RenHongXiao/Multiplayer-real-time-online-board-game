@@ -123,6 +123,25 @@ export class ChineseChess extends BaseGame {
     return legalMoves;
   }
 
+  clone(): ChineseChess {
+    const c = new ChineseChess();
+    c.board = this.board.map(row => row.map(cell => cell ? { ...cell } : null));
+    c.currentTurn = this.currentTurn;
+    c.moves = this.moves.map(m => ({
+      from: { ...m.from },
+      to: { ...m.to },
+      piece: { ...m.piece },
+      captured: m.captured ? { ...m.captured } : undefined,
+    }));
+    c.moveCount = this.moveCount;
+    c.isOver = this.isOver;
+    c.result = this.result ? { ...this.result } : null;
+    return c;
+  }
+
+  getRows(): number { return this.ROWS; }
+  getCols(): number { return this.COLS; }
+
   private pieceCanMove(piece: Piece, fx: number, fy: number, tx: number, ty: number): boolean {
     switch (piece.type) {
       case 'king': return this.kingCanMove(piece.color, fx, fy, tx, ty);
@@ -272,7 +291,7 @@ export class ChineseChess extends BaseGame {
     return null;
   }
 
-  private isKingInCheck(color: PieceColor): boolean {
+  isKingInCheck(color: PieceColor): boolean {
     const king = this.findKing(color);
     if (!king) return true;
 

@@ -24,7 +24,13 @@
       "PowerShell(cmd /c \"set PATH=D:\\\\nodejs;%PATH% && cd /d d:\\\\Comprehensive Computer Design1\\\\board-game-platform\\\\server && npx tsc --noEmit 2>&1 && echo Server OK\")",
       "PowerShell(cmd /c \"set PATH=D:\\\\nodejs;%PATH% && cd /d d:\\\\Comprehensive Computer Design1\\\\board-game-platform\\\\server && npx tsx test-game-flow.ts 2>&1\")",
       "PowerShell(cmd /c \"set PATH=D:\\\\nodejs;%PATH% && cd /d d:\\\\Comprehensive Computer Design1\\\\board-game-platform\\\\client && npx vite build 2>&1\")",
-      "PowerShell(cmd /c \"set PATH=D:\\\\nodejs;%PATH% && cd /d d:\\\\Comprehensive Computer Design1\\\\board-game-platform\\\\server && npx tsc --noEmit 2>&1 && echo OK\")"
+      "PowerShell(cmd /c \"set PATH=D:\\\\nodejs;%PATH% && cd /d d:\\\\Comprehensive Computer Design1\\\\board-game-platform\\\\server && npx tsc --noEmit 2>&1 && echo OK\")",
+      "Bash(dir /B /S \"d:\\\\Multiplayer real-time online board game\\\\*\")",
+      "Bash(Get-ChildItem -Recurse -Depth 3 \"d:\\\\Multiplayer real-time online board game\\\\board-game-platform\")",
+      "Bash(Select-Object FullName, Length)",
+      "Bash(Format-Table -AutoSize)",
+      "Bash(npx tsc *)",
+      "Bash(npm run *)"
     ]
   }
 }
